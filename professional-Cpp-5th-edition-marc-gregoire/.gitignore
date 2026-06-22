@@ -1,0 +1,21 @@
+# MSVC / build artifacts
+*.exe
+*.obj
+*.ilk
+*.pdb
+*.idb
+*.exp
+*.lib
+vc*.pdb
+
+# run.ps1 output directory
+.build/
+
+# Program-generated output (samples write these at run time)
+res.csv
+
+# Editor / OS noise
+.vs/
+*.user
+Thumbs.db
+.DS_Store

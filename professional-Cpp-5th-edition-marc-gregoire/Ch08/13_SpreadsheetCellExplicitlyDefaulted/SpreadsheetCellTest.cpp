@@ -1,0 +1,27 @@
+/*
+ * Chapter 8 - Defaulted default constructor in use
+ *
+ * Same exercises as folder 12, but powered by `= default` rather than a hand-written
+ * empty body.
+ */
+
+#include "SpreadsheetCell.h"
+#include <print>
+#include <memory>
+
+using namespace std;
+
+int main()
+{
+	SpreadsheetCell myCell;
+	myCell.setValue(6);
+	println("cell 1: {}", myCell.getValue());
+
+	auto smartCellp{ make_unique<SpreadsheetCell>() };
+	// Or with a raw pointer (not recommended)
+	SpreadsheetCell* myCellp{ new SpreadsheetCell{ } };
+	// Or
+	// SpreadsheetCell* myCellp{ new SpreadsheetCell };
+	// ... use myCellp
+	delete myCellp;    myCellp = nullptr;
+}

@@ -1,0 +1,30 @@
+{
+    "C_Cpp.default.cppStandard": "c++23",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+    "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.errorSquiggles": "enabled",
+    "files.associations": {
+        "*.h": "cpp",
+        "print": "cpp",
+        "format": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "expected": "cpp",
+        "*.tpp": "cpp",
+        "*.ipp": "cpp"
+    },
+    "files.exclude": {
+        "**/*.obj": true,
+        "**/*.ilk": true,
+        "**/*.pdb": true,
+        "**/vc140.pdb": true
+    },
+    "search.exclude": {
+        "**/*.obj": true,
+        "**/*.exe": true,
+        "**/*.pdb": true,
+        "**/*.ilk": true
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell"
+}

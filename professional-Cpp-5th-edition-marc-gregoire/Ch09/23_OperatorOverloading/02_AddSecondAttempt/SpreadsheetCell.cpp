@@ -1,0 +1,65 @@
+/*
+ * Chapter 9 - Operator Overloading: Second Attempt with operator+ as a Member
+ *
+ * Implementation for SpreadsheetCell.h - see the header for the conceptual notes.
+ * The commented-out `operator+(double rhs) const` shows the explicit overload that
+ * would avoid creating a temporary SpreadsheetCell when adding a plain double.
+ */
+#include "SpreadsheetCell.h"
+#include <charconv>
+
+using namespace std;
+
+SpreadsheetCell::SpreadsheetCell(double initialValue)
+	: m_value { initialValue }
+{
+}
+
+SpreadsheetCell::SpreadsheetCell(string_view initialValue)
+	: m_value { stringToDouble(initialValue) }
+{
+}
+
+void SpreadsheetCell::set(double value)
+{
+	m_value = value;
+}
+
+double SpreadsheetCell::getValue() const
+{
+	return m_value;
+}
+
+void SpreadsheetCell::set(string_view value)
+{
+	m_value = stringToDouble(value);
+}
+
+string SpreadsheetCell::getString() const
+{
+	return doubleToString(m_value);
+}
+
+string SpreadsheetCell::doubleToString(double value)
+{
+	return to_string(value);
+}
+
+double SpreadsheetCell::stringToDouble(string_view value)
+{
+	double number{ 0 };
+	from_chars(value.data(), value.data() + value.size(), number);
+	return number;
+}
+
+SpreadsheetCell SpreadsheetCell::operator+(const SpreadsheetCell& cell) const
+{
+	return SpreadsheetCell { getValue() + cell.getValue() };
+}
+
+/*
+SpreadsheetCell SpreadsheetCell::operator+(double rhs) const
+{
+	return SpreadsheetCell { getValue() + rhs };
+}
+*/

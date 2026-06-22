@@ -1,0 +1,27 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "MSVC (Win64)",
+            "compilerPath": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/cl.exe",
+            "compilerArgs": [
+                "/std:c++latest",
+                "/EHsc",
+                "/utf-8"
+            ],
+            "intelliSenseMode": "windows-msvc-x64",
+            "cStandard": "c17",
+            "cppStandard": "c++23",
+            "windowsSdkVersion": "10.0.26100.0",
+            "includePath": [
+                "${fileDirname}",
+                "${fileDirname}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ]
+        }
+    ]
+}
