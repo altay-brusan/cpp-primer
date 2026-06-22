@@ -40,5 +40,5 @@ void doSomething(int number_that_is_only_0_1_2_or_3)
 
 int main()
 {
-	doSomething(2);
+	doSomething(4);
 }
