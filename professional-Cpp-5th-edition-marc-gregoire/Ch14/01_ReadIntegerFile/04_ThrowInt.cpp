@@ -1,0 +1,48 @@
+/*
+ * Chapter 14 - Throwing a Non-Object Exception (an int)
+ *
+ * Demonstrates that you can throw an exception of any type, not just objects:
+ * here readIntegerFile() throws the literal int 5, and main() catches it with
+ * catch (int e). The book uses this to show what is possible while recommending
+ * against it - an int conveys no class name and no descriptive message.
+ */
+
+#include <print>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <iostream>
+
+using namespace std;
+
+vector<int> readIntegerFile(const string& filename)
+{
+	ifstream inputStream { filename };
+	if (inputStream.fail()) {
+		// We failed to open the file: throw an exception.
+		throw 5;
+	}
+
+	// Read the integers one-by-one and add them to a vector.
+	vector<int> integers;
+	int temp;
+	while (inputStream >> temp) {
+		integers.push_back(temp);
+	}
+	return integers;
+}
+
+int main()
+{
+	const string filename{ "IntegerFile.txt" };
+	vector<int> myInts;
+
+	try {
+		myInts = readIntegerFile(filename);
+	} catch (int e) {
+		println(cerr, "Unable to open file {} (Error Code {})", filename, e);
+		return 1;
+	}
+
+	println("{} ", myInts);
+}
