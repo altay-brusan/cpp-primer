@@ -1,0 +1,37 @@
+/*
+ * Chapter 26 - Tuple Printing with index_sequence and a Fold
+ *
+ * Iterates a tuple without recursion by generating a compile-time index
+ * sequence. tuplePrint() builds a make_index_sequence<sizeof...(Args)> and
+ * passes it to tuplePrintHelper(), where the Indices... pack drives a unary
+ * right fold of (println("{}", get<Indices>(t)), ...) to print every element.
+ *
+ * Key notes:
+ *   - std::index_sequence is the idiomatic way to turn a parameter pack into a
+ *     set of compile-time indices usable with std::get.
+ */
+
+#include <print>
+#include <tuple>
+#include <string>
+#include <utility>
+
+using namespace std;
+
+template <typename Tuple, size_t... Indices>
+void tuplePrintHelper(const Tuple& t, index_sequence<Indices...>)
+{
+	(println("{}", get<Indices>(t)), ...);
+}
+
+template <typename... Args>
+void tuplePrint(const tuple<Args...>& t)
+{
+	tuplePrintHelper(t, make_index_sequence<sizeof...(Args)>{});
+}
+
+int main()
+{
+	tuple t1{ 16, "Test"s, true };
+	tuplePrint(t1);
+}

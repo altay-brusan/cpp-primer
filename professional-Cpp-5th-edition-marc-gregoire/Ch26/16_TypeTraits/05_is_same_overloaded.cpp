@@ -1,0 +1,32 @@
+/*
+ * Chapter 26 - Same-Type Detection via Overloading
+ *
+ * Achieves what the is_same sample does, but without a trait: a two-parameter
+ * same(T1, T2) handles differing types while a single-parameter same(T, T)
+ * matches when both arguments share one type. The more specialized equal-type
+ * overload wins when applicable.
+ */
+
+#include <print>
+#include <type_traits>
+#include <string>
+
+using namespace std;
+
+template <typename T1, typename T2>
+void same(const T1& t1, const T2& t2)
+{
+	println("'{}' and '{}' are different types.", t1, t2);
+}
+template <typename T>
+void same(const T& t1, const T& t2)
+{
+	println("'{}' and '{}' are the same type.", t1, t2);
+}
+
+int main()
+{
+	same(1, 32);
+	same(1, 3.01);
+	same(3.01, "Test"s);
+}

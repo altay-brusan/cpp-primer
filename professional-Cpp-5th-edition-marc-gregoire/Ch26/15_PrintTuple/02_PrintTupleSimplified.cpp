@@ -1,0 +1,43 @@
+/*
+ * Chapter 26 - Simplifying Tuple Printing with a Helper Function
+ *
+ * Renames the recursive class to TuplePrintHelper and adds a small tuplePrint()
+ * function template that deduces the tuple type from its argument and looks up
+ * the size with tuple_size. Callers no longer need to specify the template
+ * arguments explicitly.
+ */
+
+#include <print>
+#include <tuple>
+#include <string>
+
+using namespace std;
+
+template <typename TupleType, int N>
+class TuplePrintHelper
+{
+public:
+	explicit TuplePrintHelper(const TupleType& t) {
+		TuplePrintHelper<TupleType, N - 1> tp{ t };
+		println("{}", get<N - 1>(t));
+	}
+};
+
+template <typename TupleType>
+class TuplePrintHelper<TupleType, 0>
+{
+public:
+	explicit TuplePrintHelper(const TupleType&) { }
+};
+
+template <typename T>
+void tuplePrint(const T& t)
+{
+	TuplePrintHelper<T, tuple_size<T>::value> tph{ t };
+}
+
+int main()
+{
+	tuple t1{ 16, "Test"s, true };
+	tuplePrint(t1);
+}
