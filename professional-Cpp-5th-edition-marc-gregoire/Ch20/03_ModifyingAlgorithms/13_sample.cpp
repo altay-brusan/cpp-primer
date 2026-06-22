@@ -1,0 +1,31 @@
+/*
+ * Chapter 20 - The sample Algorithm
+ *
+ * Demonstrates std::sample(), which selects n elements chosen at random from a
+ * source range and stores them in a destination range. It takes source begin/end,
+ * a destination begin iterator, the sample count, and a random number generator.
+ * The example draws five samples from a vector six times.
+ */
+
+#include <print>
+#include <vector>
+#include <algorithm>
+#include <random>
+#include <cstddef>
+
+using namespace std;
+
+int main()
+{
+	vector values{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	const size_t numberOfSamples{ 5 };
+	vector<int> samples(numberOfSamples);
+
+	random_device seeder;
+	default_random_engine generator{ seeder() };
+
+	for (int i{ 0 }; i < 6; ++i) {
+		sample(cbegin(values), cend(values), begin(samples), numberOfSamples, generator);
+		println("{:n}", samples);
+	}
+}

@@ -1,0 +1,24 @@
+/*
+ * Chapter 20 - Constrained Non-modifying Sequence Algorithms
+ *
+ * Demonstrates several C++23 ranges-based predicate algorithms that return a bool:
+ * ranges::contains() (whether a value is present), ranges::contains_subrange()
+ * (whether one range occurs within another), and ranges::starts_with() (whether a
+ * range begins with another). Each is called with whole containers as ranges.
+ */
+
+#include <print>
+#include <vector>
+#include <algorithm>
+#include <ranges>
+
+using namespace std;
+
+int main()
+{
+	vector values{ 11, 22, 33, 44, 55 };
+	vector v{ 11, 22 };
+	println("{} contains 33 = {}", values, ranges::contains(values, 33));
+	println("{} contains {} = {}", values, v, ranges::contains_subrange(values, v));
+	println("{} starts with {} = {}", values, v, ranges::starts_with(values, v));
+}
