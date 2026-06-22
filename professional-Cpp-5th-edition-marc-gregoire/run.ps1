@@ -25,7 +25,8 @@ param(
     [int]$Sample,
     [int]$File,
     [switch]$List,
-    [switch]$NoRun
+    [switch]$NoRun,
+    [switch]$Verify
 )
 
 $ErrorActionPreference = 'Stop'
@@ -131,11 +132,11 @@ function Show-Chapters {
     Write-Host ""
 }
 
-# Compile $MainFile + sibling non-main .cpp into .build, optionally run.
-function Build-And-Run {
+# Compile $MainFile + sibling non-main .cpp into .build. Returns $true on success.
+function Invoke-Build {
     param(
         [Parameter(Mandatory)][string]$MainFile,
-        [switch]$Run
+        [switch]$Quiet
     )
     Initialize-Msvc
     $main = (Resolve-Path -LiteralPath $MainFile).Path
@@ -156,27 +157,48 @@ function Build-And-Run {
     $exe = Join-Path $outDir "$base.exe"
 
     $inputs = @($main) + $siblings
-    Write-Host ("Compiling {0}" -f (Split-Path $main -Leaf)) -ForegroundColor Cyan
-    Write-Host ("  sources: {0}" -f (($inputs | ForEach-Object { Split-Path $_ -Leaf }) -join ', ')) -ForegroundColor DarkGray
+    if (-not $Quiet) {
+        Write-Host ("Compiling {0}" -f (Split-Path $main -Leaf)) -ForegroundColor Cyan
+        Write-Host ("  sources: {0}" -f (($inputs | ForEach-Object { Split-Path $_ -Leaf }) -join ', ')) -ForegroundColor DarkGray
+    }
 
     Push-Location $outDir
     try {
-        & cl /nologo /std:c++latest /EHsc /W4 /utf-8 /MD /Zi /Fe:$exe $inputs
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host ("Build failed (exit {0})." -f $LASTEXITCODE) -ForegroundColor Red
-            return
+        if ($Quiet) {
+            & cl /nologo /std:c++latest /EHsc /W4 /utf-8 /MD /Zi /Fe:$exe $inputs *> $null
+        } else {
+            & cl /nologo /std:c++latest /EHsc /W4 /utf-8 /MD /Zi /Fe:$exe $inputs
         }
-        Write-Host ("Built: {0}" -f $exe) -ForegroundColor Green
-        if ($Run) {
-            # Run inside the sample's source dir so relative data files resolve.
-            Push-Location $dir
-            try {
-                Write-Host ("Running {0}...`n" -f $base) -ForegroundColor Cyan
-                & $exe
-                Write-Host ("`nProgram exited with code {0}." -f $LASTEXITCODE) -ForegroundColor DarkGray
-            } finally { Pop-Location }
-        }
+        $ok = ($LASTEXITCODE -eq 0)
     } finally { Pop-Location }
+    return $ok
+}
+
+# Build one sample's main file, then run it (unless suppressed).
+function Build-And-Run {
+    param(
+        [Parameter(Mandatory)][string]$MainFile,
+        [switch]$Run
+    )
+    $main = (Resolve-Path -LiteralPath $MainFile).Path
+    $dir  = Split-Path $main -Parent
+    $base = [IO.Path]::GetFileNameWithoutExtension($main)
+    $exe  = Join-Path (Join-Path (Join-Path $root '.build') ($dir.Substring($root.Length).TrimStart('\','/'))) (Join-Path $base "$base.exe")
+
+    if (-not (Invoke-Build -MainFile $main)) {
+        Write-Host "Build failed." -ForegroundColor Red
+        return
+    }
+    Write-Host ("Built: {0}" -f $exe) -ForegroundColor Green
+    if ($Run) {
+        # Run inside the sample's source dir so relative data files resolve.
+        Push-Location $dir
+        try {
+            Write-Host ("Running {0}...`n" -f $base) -ForegroundColor Cyan
+            & $exe
+            Write-Host ("`nProgram exited with code {0}." -f $LASTEXITCODE) -ForegroundColor DarkGray
+        } finally { Pop-Location }
+    }
 }
 
 function Read-Choice {
@@ -190,8 +212,43 @@ function Read-Choice {
     }
 }
 
+# Compile every runnable file in a chapter (no run). Returns $true if all pass.
+function Verify-Chapter {
+    param([Parameter(Mandatory)]$ChapterDir)
+    $n = Get-ChapterNumber $ChapterDir
+    Write-Host ("`nVerifying Ch{0:00} - {1}" -f $n, $ChapterTitles[$n]) -ForegroundColor Cyan
+    $pass = 0; $fail = 0; $failed = @()
+    foreach ($s in (Get-Samples -ChapterPath $ChapterDir.FullName)) {
+        $mains = @(Get-ChildItem -LiteralPath $s -Filter *.cpp | Where-Object { Test-HasMain -Path $_.FullName })
+        foreach ($m in $mains) {
+            $relName = $m.FullName.Substring($ChapterDir.FullName.Length).TrimStart('\','/')
+            if (Invoke-Build -MainFile $m.FullName -Quiet) {
+                Write-Host ("  PASS  {0}" -f $relName) -ForegroundColor Green
+                $pass++
+            } else {
+                Write-Host ("  FAIL  {0}" -f $relName) -ForegroundColor Red
+                $fail++; $failed += $relName
+            }
+        }
+    }
+    Write-Host ("Ch{0:00}: {1} passed, {2} failed" -f $n, $pass, $fail) -ForegroundColor ($(if ($fail) { 'Yellow' } else { 'Green' }))
+    if ($fail) { $failed | ForEach-Object { Write-Host "    - $_" -ForegroundColor Yellow } }
+    return ($fail -eq 0)
+}
+
 # ------------------------------------------------------------------ main flow
 if ($List) { Show-Chapters; return }
+
+if ($Verify) {
+    $targets = if ($PSBoundParameters.ContainsKey('Chapter')) {
+        @(Get-Chapters | Where-Object { (Get-ChapterNumber $_) -eq $Chapter })
+    } else { @(Get-Chapters) }
+    if ($targets.Count -eq 0) { throw "Chapter $Chapter not found." }
+    $allOk = $true
+    foreach ($t in $targets) { if (-not (Verify-Chapter -ChapterDir $t)) { $allOk = $false } }
+    if (-not $allOk) { exit 1 }
+    return
+}
 
 # Resolve chapter directory.
 $chapterDir = $null
