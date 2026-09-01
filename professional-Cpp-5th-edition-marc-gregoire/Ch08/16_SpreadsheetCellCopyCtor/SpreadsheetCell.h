@@ -22,6 +22,14 @@
  *   - For performance, pass objects as `const Class&` to avoid invoking the copy ctor on
  *     every call.
  *
+ * 
+ * 
+ *	To summarize it perfectly:
+ *	1. **New object being created:** The left-hand side object **does not exist yet** in memory.
+ *	2. **Existing object as the template:** You pass an **already-existing object** as the source to construct and populate the new one.
+ *	Whenever those two conditions are met—whether you write `T newObj = existingObj;`, `T newObj{ existingObj };`, pass an object into a function parameter by value (`void func(T param)`), or return an object by value—C++ will always invoke the **Copy Constructor**.
+ *	If the object on the left already exists in memory, only then does it switch to the **Copy Assignment Operator** (`operator=`).
+ * 
  * Example:
  *     // The hand-written copy ctor below could just as well be written:
  *     SpreadsheetCell(const SpreadsheetCell& src) = default;
