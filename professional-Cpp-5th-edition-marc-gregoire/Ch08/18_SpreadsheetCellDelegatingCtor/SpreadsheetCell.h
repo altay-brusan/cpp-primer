@@ -17,6 +17,15 @@
  *   - Delegating is the right cure for the "I want to call my own constructor from
  *     another" itch that folder 10's note warned against.
  *
+ * SpreadsheetCell::SpreadsheetCell(std::string_view str) 
+ *   : SpreadsheetCell{ stringToDouble(str) }, m_value{ 0 } // COMPILER ERROR!
+ *		{ 
+ *  	 	WRONG! This creates an UNNAMED TEMPORARY object and immediately destroys it.
+ *   	 	It does NOT initialize the current object ('this').
+ *    		SpreadsheetCell{ stringToDouble(str) 
+ * 		};
+ * 
+ * 
  * Example:
  *     // Delegating from the string ctor to the double ctor:
  *     SpreadsheetCell::SpreadsheetCell(string_view s)
